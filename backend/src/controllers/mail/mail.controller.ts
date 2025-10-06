@@ -1,4 +1,5 @@
 import { NextFunction, Request, Response } from "express";
+import { sendEmailService } from "../../services/mail/mail.service";
 
 class MailController {
   public async sendMail(
@@ -7,8 +8,10 @@ class MailController {
     next: NextFunction
   ): Promise<void> {
     try {
-      const { email, subject, message } = req.body;
-      res.status(200).send({ email, subject, message });
+      await sendEmailService(req.body);
+      res
+        .status(200)
+        .send({ message: "Email sent successfully", success: true });
     } catch (error) {
       next(error);
     }
