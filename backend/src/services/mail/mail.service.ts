@@ -5,7 +5,6 @@ import { transport } from "../../config/nodemailer";
 import { generateEmailTemplates } from "../../utils/emailTemplate";
 
 export const sendEmailService = async (data: MailResponse) => {
-  console.log("📩 Incoming data:", data);
   const { name, email, subject, message } = data;
   if (!name || !email || !subject || !message) {
     throw new AppError("Email, subject, and message are required", 400);

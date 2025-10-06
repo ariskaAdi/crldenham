@@ -1,55 +1,85 @@
+"use client";
+
+import { useSendMail } from "@/hooks/useMail";
+import { sendMailSchema } from "@/lib/validation/mail";
+import { MailResponse } from "@/types/mail.types";
 import React from "react";
+import { useForm } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { toast } from "sonner";
 
 const FormEmail = () => {
+  const { mutate: sendEmail, isPending, isError } = useSendMail();
+  const {
+    register,
+    handleSubmit,
+    setValue,
+    formState: { errors },
+    reset,
+  } = useForm<MailResponse>({
+    resolver: zodResolver(sendMailSchema),
+    defaultValues: {
+      name: "",
+      email: "",
+      subject: "",
+      message: "",
+    },
+  });
+
+  const onSubmit = (data: MailResponse) => {
+    sendEmail(data, {
+      onSuccess: () => {
+        reset();
+        toast.success("Message sent successfully");
+      },
+    });
+  };
   return (
     <div>
-      <form className="space-y-5">
+      <form className="space-y-5" onSubmit={handleSubmit(onSubmit)}>
         <input
-          type="text"
+          id="name"
           placeholder="Full Name"
           className="w-full p-3 border-b border-gray-300 bg-transparent focus:outline-none focus:border-black placeholder:text-gray-500"
+          {...register("name")}
         />
+        {errors.name && (
+          <p className="text-sm text-red-500 ">{errors.name.message}</p>
+        )}
         <input
-          type="email"
+          id="email"
           placeholder="Email Address"
           className="w-full p-3 border-b border-gray-300 bg-transparent focus:outline-none focus:border-black placeholder:text-gray-500"
+          {...register("email")}
         />
+        {errors.email && (
+          <p className="text-sm text-red-500 ">{errors.email.message}</p>
+        )}
         <input
-          type="text"
+          id="subject"
           placeholder="Subject"
           className="w-full p-3 border-b border-gray-300 bg-transparent focus:outline-none focus:border-black placeholder:text-gray-500"
+          {...register("subject")}
         />
+        {errors.subject && (
+          <p className="text-sm text-red-500 ">{errors.subject.message}</p>
+        )}
         <textarea
+          id="message"
           placeholder="Your Message"
           rows={4}
-          className="w-full p-3 border-b border-gray-300 bg-transparent focus:outline-none focus:border-black placeholder:text-gray-500"></textarea>
+          className="w-full p-3 border-b border-gray-300 bg-transparent focus:outline-none focus:border-black placeholder:text-gray-500"
+          {...register("message")}
+        />
+        {errors.message && (
+          <p className="text-sm text-red-500 ">{errors.message.message}</p>
+        )}
 
         <button
           type="submit"
-          className="bg-black text-white px-6 py-3 rounded-full flex items-center space-x-2 hover:bg-gray-800 transition-colors">
-          <span>Send Message</span>
-          <svg
-            width="14"
-            height="14"
-            viewBox="0 0 14 14"
-            fill="none"
-            xmlns="http://www.w3.org/2000/svg"
-            className="ml-2">
-            <path
-              d="M1.16699 7H12.8337"
-              stroke="white"
-              strokeWidth="1.5"
-              strokeLinecap="round"
-              strokeLinejoin="round"
-            />
-            <path
-              d="M7 1.16699L12.8333 7.00033L7 12.8337"
-              stroke="white"
-              strokeWidth="1.5"
-              strokeLinecap="round"
-              strokeLinejoin="round"
-            />
-          </svg>
+          className="bg-black text-white px-6 py-3 rounded-full flex items-center space-x-2 hover:bg-gray-800 transition-colors cursor-pointer"
+          disabled={isPending}>
+          <span>{isPending ? "Sending..." : "Send"}</span>
         </button>
       </form>
     </div>
